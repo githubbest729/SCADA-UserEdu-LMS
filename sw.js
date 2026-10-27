@@ -1,0 +1,19 @@
+"use strict";
+const V="v1.0.0",SHELL="scada-shell-"+V,MEDIA="scada-media-"+V,VAULT="SCADA_Media_Vault";
+const FILES=["./","./index.html","./offline.html","./manifest.webmanifest","./css/styles.css","./js/app.js","./js/db.js","./js/curriculum.js","./js/certificates.js","./assets/wonderware-handover-sop.json","./favicon.svg","./favicon.ico","./apple-touch-icon.png","./icons/icon-192.png","./icons/icon-512.png","./icons/icon-maskable-512.png"];
+self.addEventListener("install",e=>e.waitUntil((async()=>{const c=await caches.open(SHELL);await c.addAll(FILES);
+if(e.addRoutes){try{await e.addRoutes([{condition:{urlPattern:{pathname:"/**/icons/*"}},source:{cacheName:MEDIA}},{condition:{requestMode:"navigate",not:{urlPattern:{pathname:"/**/share-target"}}},source:"fetch-event"}])}catch{}}})()));
+self.addEventListener("activate",e=>e.waitUntil((async()=>{for(const k of await caches.keys())if(![SHELL,MEDIA,VAULT].includes(k))await caches.delete(k);await clients.claim();if(self.registration.navigationPreload)await self.registration.navigationPreload.enable().catch(()=>{})})()));
+self.addEventListener("message",e=>{if(e.data&&e.data.type==="SKIP_WAITING")self.skipWaiting()});
+const swr=async r=>{const c=await caches.open(SHELL),h=await c.match(r),n=fetch(r).then(x=>{if(x.ok)c.put(r,x.clone());return x}).catch(()=>h);return h||n};
+const cf=async r=>{const h=await caches.match(r);if(h)return h;const x=await fetch(r);if(x.ok)(await caches.open(MEDIA)).put(r,x.clone());return x};
+self.addEventListener("fetch",e=>{const r=e.request,u=new URL(r.url);
+if(r.method==="POST"&&u.pathname.endsWith("/share-target")){e.respondWith((async()=>{const f=await r.formData(),c=await caches.open(VAULT);for(const x of f.getAll("media")){if(x&&x.name)await c.put("./vault/"+encodeURIComponent(x.name),new Response(x,{headers:{"content-type":x.type,"content-length":x.size}}))}return Response.redirect("./index.html?shared=1&view=storage",303)})());return}
+if(r.method!=="GET"||u.origin!==location.origin)return;
+if(r.mode==="navigate"){e.respondWith((async()=>{try{const p=await e.preloadResponse;return p||await fetch(r)}catch{return(await caches.match(r,{ignoreSearch:true}))||(await caches.match("./index.html"))||caches.match("./offline.html")}})());return}
+if(/\/(icons|screenshots)\/|\.(png|ico|svg|woff2?|mp4|pdf)$/.test(u.pathname))e.respondWith(cf(r));else e.respondWith(swr(r))});
+self.addEventListener("sync",e=>{if(e.tag==="sync-training-records")e.waitUntil(self.clients.matchAll().then(cs=>cs.forEach(c=>c.postMessage({type:"SYNC_DONE"}))))});
+self.addEventListener("periodicsync",e=>{if(e.tag==="periodic-curriculum-sync")e.waitUntil(caches.open(SHELL).then(c=>c.add("./assets/wonderware-handover-sop.json")).catch(()=>{}))});
+self.addEventListener("backgroundfetchsuccess",e=>e.waitUntil((async()=>{const c=await caches.open(VAULT);for(const r of await e.registration.matchAll()){const x=await r.responseReady;await c.put(r.request,x)}e.updateUI&&e.updateUI({title:"Training pack downloaded"})})()));
+self.addEventListener("push",e=>{let d={};try{d=e.data?e.data.json():{}}catch{}const m=d.web_push===8030&&d.notification?d.notification:d;e.waitUntil((async()=>{await self.registration.showNotification(m.title||"SCADA UserEdu LMS",{body:m.body||"Pending trainee evaluations",icon:"icons/icon-192.png",badge:"icons/icon-96.png",data:{url:m.navigate||"./index.html"}});if(self.navigator.setAppBadge)self.navigator.setAppBadge(d.count||1).catch(()=>{})})())});
+self.addEventListener("notificationclick",e=>{e.notification.close();e.waitUntil(clients.openWindow(e.notification.data.url))});

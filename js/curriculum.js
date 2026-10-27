@@ -1,0 +1,23 @@
+"use strict";
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const CUR=(()=>{let editing=null,run=null,timer=null;const $=id=>document.getElementById(id);
+async function seed(){if((await DB.count("courses"))>0)return;const r=await fetch("assets/wonderware-handover-sop.json");const j=await r.json();for(const m of j.modules)await DB.put("courses",m);await DB.log("Seeded "+j.modules.length+" modules")}
+async function mods(arch){return(await DB.all("courses")).filter(m=>arch||!m.archived)}
+async function render(){const arch=$("showArch").checked,l=await mods(arch);$("modList").innerHTML=l.map(m=>`<article class="card ${m.archived?"warn":""}"><h3>${esc(m.title)}</h3><p>${esc(m.desc)}</p><ul>${(m.checklist||[]).map(c=>`<li>${esc(c)}</li>`).join("")}</ul>${m.guide?`<p><b>Guide:</b> ${esc(m.guide)}</p>`:""}<p>${(m.quiz||[]).length} quiz questions${m.archived?" · archived":""}</p><div class="row"><button data-a="edit" data-id="${m.id}">Edit</button><button data-a="clone" data-id="${m.id}">Clone</button><button data-a="arch" data-id="${m.id}">${m.archived?"Restore":"Archive"}</button></div></article>`).join("")||"<p>No modules yet. Select New module to create one.</p>";
+const opts=(await mods()).map(m=>`<option value="${m.id}">${esc(m.title)}</option>`).join("");$("sesMod").innerHTML=opts;$("qMod").innerHTML=opts}
+function init(){$("showArch").onchange=render;$("newMod").onclick=()=>{editing={id:null};fill({})};
+$("modList").onclick=async e=>{const b=e.target.closest("button");if(!b)return;const m=await DB.get("courses",b.dataset.id);
+if(b.dataset.a==="edit"){editing=m;fill(m)}else if(b.dataset.a==="clone"){const c={...m,id:null,title:m.title+" (copy)",builtin:false};await DB.put("courses",c);await DB.log("Cloned "+m.title)}else{m.archived=!m.archived;await DB.put("courses",m);await DB.log((m.archived?"Archived ":"Restored ")+m.title)}await DB.queue({type:"course"});render()};
+function fill(m){const f=$("modForm");f.title.value=m.title||"";f.desc.value=m.desc||"";f.checklist.value=(m.checklist||[]).join("\n");f.guide.value=m.guide||"";$("modDlg").showModal()}
+$("modForm").onsubmit=async e=>{if(e.submitter.value!=="ok")return;const f=e.target,m=editing.id?editing:{id:null,quiz:[],archived:false};m.title=f.title.value;m.desc=f.desc.value;m.checklist=f.checklist.value.split("\n").map(s=>s.trim()).filter(Boolean);m.guide=f.guide.value;await DB.put("courses",m);await DB.log("Saved module "+m.title);await DB.queue({type:"course"});render()};
+$("qStart").onclick=start;
+$("qArea").onclick=e=>{const b=e.target.closest("[data-o]");if(b&&run)answer(+b.dataset.o)}}
+async function start(){const m=await DB.get("courses",$("qMod").value);if(!m||!(m.quiz||[]).length){App.toast("This module has no quiz questions. Add them in the module or pick another.");return}
+run={m,i:0,ans:[],t0:Date.now(),tr:$("qTr").value};ask();timer=setInterval(()=>{const t=$("qT");if(t)t.textContent=Math.floor((Date.now()-run.t0)/1000)+" s"},500)}
+function ask(){const q=run.m.quiz[run.i];$("qArea").innerHTML=`<div class="card"><p>Question ${run.i+1} of ${run.m.quiz.length} · <span id="qT">0 s</span></p><h3>${esc(q.q)}</h3>${q.o.map((o,k)=>`<button class="opt" data-o="${k}">${esc(o)}</button>`).join("")}</div>`}
+async function answer(k){run.ans.push(k);if(++run.i<run.m.quiz.length)return ask();clearInterval(timer);const qs=run.m.quiz,ok=qs.filter((q,i)=>run.ans[i]===q.a).length,pct=Math.round(ok/qs.length*100),pass=pct>=80,sec=Math.round((Date.now()-run.t0)/1000);
+const rem=qs.filter((q,i)=>run.ans[i]!==q.a).map(q=>q.r).filter(Boolean);
+const rec={id:null,moduleId:run.m.id,moduleTitle:run.m.title,traineeId:run.tr||null,sessionId:null,score:pct,pass,seconds:sec,remediation:rem,date:new Date().toISOString()};
+if(run.tr){const t=await DB.get("trainees",run.tr);rec.sessionId=t&&t.sessionId}await DB.put("assessments",rec);await DB.log(`Assessment ${run.m.title}: ${pct}% ${pass?"PASS":"FAIL"}`);await DB.queue({type:"assessment"});
+$("qArea").innerHTML=`<div class="card ${pass?"":"warn"}"><div class="big ${pass?"ok":"bad"}">${pct}% — ${pass?"PASS":"FAIL"}</div><p>Pass mark 80%. Time ${sec} s. ${run.tr?"":"No trainee selected, result saved as anonymous."}</p>${rem.length?`<h3>Remediation notes</h3><ul>${rem.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>`:"<p>No remediation needed.</p>"}</div>`;run=null;App.badge()}
+return{seed,render,init,mods}})();

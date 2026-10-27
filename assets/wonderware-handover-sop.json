@@ -1,0 +1,295 @@
+{
+ "version": 1,
+ "modules": [
+  {
+   "id": "m1",
+   "title": "Wonderware InTouch / System Platform HMI Navigation & Faceplates",
+   "desc": "Navigating windows, object faceplates, user login levels and manual/auto control.",
+   "checklist": [
+    "Log in with operator credentials",
+    "Open overview and area windows",
+    "Open a pump faceplate and read status",
+    "Change a setpoint within limits",
+    "Log out at end of shift"
+   ],
+   "quiz": [
+    {
+     "q": "Which element shows a device's detailed status and control options?",
+     "o": [
+      "Faceplate",
+      "Trend pen",
+      "Historian tag",
+      "Splash screen"
+     ],
+     "a": 0,
+     "r": "Review faceplate opening and reading."
+    },
+    {
+     "q": "A setpoint field is greyed out. Most likely cause?",
+     "o": [
+      "Insufficient user access level",
+      "Network cable cut",
+      "Historian full",
+      "Printer offline"
+     ],
+     "a": 0,
+     "r": "Review security levels and login."
+    },
+    {
+     "q": "What should you do before changing a controller to Manual?",
+     "o": [
+      "Confirm process state and get supervisor approval",
+      "Restart the server",
+      "Clear all alarms",
+      "Nothing"
+     ],
+     "a": 0,
+     "r": "Review manual-mode change procedure."
+    }
+   ],
+   "archived": false,
+   "builtin": true
+  },
+  {
+   "id": "m2",
+   "title": "Alarm Management, Priority Filtering, Acknowledgement & Shelving",
+   "desc": "Alarm priorities, filtering, acknowledging and shelving nuisance alarms.",
+   "checklist": [
+    "Filter alarm summary by priority",
+    "Acknowledge a single alarm",
+    "Shelve a chattering alarm with reason",
+    "Review shelved alarms at shift end"
+   ],
+   "quiz": [
+    {
+     "q": "SIMULATOR: Tank T-101 raises a High-High level alarm. First action?",
+     "o": [
+      "Acknowledge and check inlet valve/pump status, follow SOP",
+      "Shelve it",
+      "Ignore, it is only HMI",
+      "Reboot SCADA"
+     ],
+     "a": 0,
+     "r": "Review high-high alarm response SOP."
+    },
+    {
+     "q": "Shelving an alarm means?",
+     "o": [
+      "Temporarily suppressing it with a recorded reason",
+      "Deleting it",
+      "Changing its priority",
+      "Archiving history"
+     ],
+     "a": 0,
+     "r": "Review shelving rules."
+    },
+    {
+     "q": "Which alarms get the fastest response?",
+     "o": [
+      "Critical / priority 1",
+      "Diagnostic",
+      "Info",
+      "Shelved"
+     ],
+     "a": 0,
+     "r": "Review priority definitions."
+    }
+   ],
+   "archived": false,
+   "builtin": true
+  },
+  {
+   "id": "m3",
+   "title": "Historical Trend Analysis & SQL Server Historian Data Retrieval",
+   "desc": "Using trends, time ranges, pens and querying the historian.",
+   "checklist": [
+    "Open a trend and add pens",
+    "Change time range",
+    "Export trend data to CSV",
+    "Run a standard historian query"
+   ],
+   "quiz": [
+    {
+     "q": "SIMULATOR: A historian query returns slowly over 6 months of 1-second data. Best fix?",
+     "o": [
+      "Narrow the time range or use retrieval resolution/averaging",
+      "Delete the database",
+      "Restart PLC",
+      "Disable alarms"
+     ],
+     "a": 0,
+     "r": "Review retrieval modes and ranges."
+    },
+    {
+     "q": "Why compare two pens on one trend?",
+     "o": [
+      "Correlate process variables over time",
+      "Reduce disk use",
+      "Reset counters",
+      "Speed up PLC"
+     ],
+     "a": 0,
+     "r": "Review trend pen setup."
+    },
+    {
+     "q": "Historian data is stored in?",
+     "o": [
+      "SQL Server",
+      "Excel only",
+      "Faceplate",
+      "PLC ladder"
+     ],
+     "a": 0,
+     "r": "Review historian architecture."
+    }
+   ],
+   "archived": false,
+   "builtin": true
+  },
+  {
+   "id": "m4",
+   "title": "PLC & Field Communication Diagnostics (OPC UA, OI Servers, Modbus TCP/RTU)",
+   "desc": "Diagnosing comms loss between SCADA, OI Server and field devices.",
+   "checklist": [
+    "Check OI Server diagnostics status",
+    "Ping the PLC IP",
+    "Verify Modbus unit ID and port 502",
+    "Check OPC UA endpoint and certificate",
+    "Record fault in log"
+   ],
+   "quiz": [
+    {
+     "q": "SIMULATOR: All Modbus TCP tags show Bad quality. What do you check first?",
+     "o": [
+      "Network link/ping to PLC and OI Server connection status",
+      "Rewrite HMI graphics",
+      "Change alarm colours",
+      "Reinstall Windows"
+     ],
+     "a": 0,
+     "r": "Review comms triage order: physical, network, driver, tags."
+    },
+    {
+     "q": "Default Modbus TCP port?",
+     "o": [
+      "502",
+      "80",
+      "1433",
+      "4840"
+     ],
+     "a": 0,
+     "r": "Review Modbus basics."
+    },
+    {
+     "q": "Default OPC UA port commonly used?",
+     "o": [
+      "4840",
+      "502",
+      "21",
+      "3389"
+     ],
+     "a": 0,
+     "r": "Review OPC UA endpoints."
+    }
+   ],
+   "archived": false,
+   "builtin": true
+  },
+  {
+   "id": "m5",
+   "title": "Routine SCADA Maintenance, DB Backups, Script Debugging & Patching",
+   "desc": "Scheduled backups, script error review, patch windows.",
+   "checklist": [
+    "Verify last backup completed",
+    "Test a restore on a spare machine",
+    "Review script error log",
+    "Apply patches only in approved window"
+   ],
+   "quiz": [
+    {
+     "q": "How often should backup restores be tested?",
+     "o": [
+      "Periodically, per maintenance plan",
+      "Never",
+      "Only after failure",
+      "Only on holidays"
+     ],
+     "a": 0,
+     "r": "Review backup verification."
+    },
+    {
+     "q": "Before patching a production SCADA server you must?",
+     "o": [
+      "Take a backup and get approval for a window",
+      "Patch immediately",
+      "Disconnect PLCs",
+      "Delete logs"
+     ],
+     "a": 0,
+     "r": "Review change control."
+    },
+    {
+     "q": "First step in debugging a failing script?",
+     "o": [
+      "Read the logger/error message",
+      "Rewrite it",
+      "Reboot",
+      "Disable security"
+     ],
+     "a": 0,
+     "r": "Review script debug steps."
+    }
+   ],
+   "archived": false,
+   "builtin": true
+  },
+  {
+   "id": "m6",
+   "title": "QHSE Compliance & Emergency Shutdown (ESD) Safety Procedures (Annexure-SCT-HR-001)",
+   "desc": "QHSE rules and ESD procedures per Annexure-SCT-HR-001.",
+   "checklist": [
+    "Read Annexure-SCT-HR-001 requirements",
+    "Locate ESD push buttons and HMI ESD screen",
+    "Follow evacuation and muster rules",
+    "Report incidents/near misses"
+   ],
+   "quiz": [
+    {
+     "q": "When may an operator bypass an ESD interlock?",
+     "o": [
+      "Only with formal authorized permit",
+      "Whenever convenient",
+      "Never reported",
+      "If alarm is noisy"
+     ],
+     "a": 0,
+     "r": "Review interlock bypass permit rules."
+    },
+    {
+     "q": "After an ESD trip, what comes first?",
+     "o": [
+      "Make area safe and report; do not reset blindly",
+      "Reset immediately",
+      "Leave site",
+      "Shelve alarms"
+     ],
+     "a": 0,
+     "r": "Review post-ESD procedure."
+    },
+    {
+     "q": "Which document is the QHSE compliance reference?",
+     "o": [
+      "Annexure-SCT-HR-001",
+      "Menu card",
+      "Price list",
+      "Wiki"
+     ],
+     "a": 0,
+     "r": "Review Annexure-SCT-HR-001."
+    }
+   ],
+   "archived": false,
+   "builtin": true
+  }
+ ]
+}
